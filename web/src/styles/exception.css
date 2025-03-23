@@ -1,0 +1,9 @@
+/* Specific cases that don't fit into other categories */
+.todo-form input {
+  flex: 1;
+}
+
+.todo-item button {
+  padding: 4px 8px;
+  font-size: 14px;
+} 
