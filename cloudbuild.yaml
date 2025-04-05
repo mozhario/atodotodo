@@ -1,0 +1,31 @@
+steps:
+  # Build API image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/todo-api', './api']
+    id: 'build-api'
+
+  # Push API image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/todo-api']
+    id: 'push-api'
+
+  # Deploy API to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'todo-api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/todo-api'
+      - '--region'
+      - 'europe-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'MONGODB_URI=${_MONGODB_URI}'
+    id: 'deploy-api'
+
+images:
+  - 'gcr.io/$PROJECT_ID/todo-api' 
