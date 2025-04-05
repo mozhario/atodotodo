@@ -20,6 +20,8 @@ services:
     build: 
       context: ./web
       dockerfile: Dockerfile
+    environment:
+      - API_URL=https://todo-api-xxxxx-xx.a.run.app
     deploy:
       replicas: 2
       restart_policy:

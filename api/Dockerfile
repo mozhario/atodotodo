@@ -15,7 +15,10 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/node_modules ./node_modules
 
 ENV NODE_ENV=production
-ENV PORT=5000
+ENV PORT=8080
 
-EXPOSE 5000
-CMD ["npm", "start"] 
+# Cloud Run port
+EXPOSE 8080
+
+# use node instead of npm for better performance
+CMD ["node", "src/index.js"] 

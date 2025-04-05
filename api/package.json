@@ -8,7 +8,8 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start:prod": "NODE_ENV=production node src/index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -16,7 +17,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "swagger-ui-express": "^5.0.0",
-    "swagger-jsdoc": "^6.2.8"
+    "swagger-jsdoc": "^6.2.8",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
