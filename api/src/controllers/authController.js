@@ -1,7 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Todo from '../models/Todo.js';
+import { UserService } from '../services/userService.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const userService = new UserService();
 
 export const register = async (req, res) => {
   try {
@@ -11,18 +14,12 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Username already exists' });
-    }
-
-    const user = await User.create({ username, password });
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '24h' });
-
-    res.status(201).json({ token, user: { id: user._id, username: user.username } });
+    const result = await userService.register(username, password);
+    res.status(201).json(result);
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ error: 'Error creating user' });
+    res.status(error.message === 'Username already exists' ? 400 : 500)
+      .json({ error: error.message || 'Error creating user' });
   }
 };
 
@@ -34,20 +31,11 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const isValidPassword = await user.validatePassword(password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '24h' });
-    res.json({ token, user: { id: user._id, username: user.username } });
+    const result = await userService.login(username, password);
+    res.json(result);
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Error logging in' });
+    res.status(error.message === 'Invalid credentials' ? 401 : 500)
+      .json({ error: error.message || 'Error logging in' });
   }
 }; 
