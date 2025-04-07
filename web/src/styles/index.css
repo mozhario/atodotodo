@@ -22,12 +22,7 @@ body {
   padding: 20px;
 }
 
-.todo-form {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
+/* Common form elements */
 .input {
   flex: 1;
   padding: 8px 12px;
@@ -36,20 +31,7 @@ body {
   font-size: 16px;
 }
 
-.edit-input {
-  flex: 1;
-  padding: 4px 8px;
-  margin: 0;
-  border: none;
-  font-size: 16px;
-  background: transparent;
-  cursor: text;
-}
-
-.edit-input:focus {
-  outline: none;
-}
-
+/* Common button styles */
 .btn {
   padding: 8px 16px;
   border: none;
@@ -90,6 +72,43 @@ body {
   color: #45a049;
 }
 
+/* Common utility classes */
+.text-decoration-line-through {
+  text-decoration: line-through;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.todo-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 4px 8px;
+  margin: 0;
+  border: none;
+  font-size: 16px;
+  background: transparent;
+  cursor: text;
+}
+
+.edit-input:focus {
+  outline: none;
+}
+
 .todo-list {
   list-style: none;
   padding: 0;
@@ -115,22 +134,6 @@ body {
 
 .todo-item.completed {
   background-color: #f9f9f9;
-}
-
-.text-decoration-line-through {
-  text-decoration: line-through;
-}
-
-.text-muted {
-  color: #6c757d;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.ml-auto {
-  margin-left: auto;
 }
 
 .auth-form {
