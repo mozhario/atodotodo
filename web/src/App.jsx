@@ -4,6 +4,7 @@ import Header from './components/Header/Header'
 import AuthForm from './components/Auth/AuthForm'
 import TodoForm from './components/TodoForm/TodoForm'
 import TodoList from './components/TodoList/TodoList'
+import { audioService } from './services/AudioService'
 import './styles/index.css'
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setTodos([response.data, ...todos])
+      audioService.playAddSound()
     } catch (error) {
       console.error('Error adding todo:', error)
     }
@@ -69,12 +71,18 @@ function App() {
   const handleToggleTodo = async (id) => {
     try {
       const token = localStorage.getItem('token')
+      const todo = todos.find(t => t.id === id)
       const response = await axios.post(`/api/todos/${id}/toggle`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTodos(todos.map(todo => 
         todo.id === id ? response.data : todo
       ))
+      if (response.data.completed) {
+        audioService.playCheckSound()
+      } else {
+        audioService.playUncheckSound()
+      }
     } catch (error) {
       console.error('Error updating todo:', error)
     }
@@ -102,6 +110,7 @@ function App() {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTodos(todos.filter(todo => todo.id !== id))
+      audioService.playDeleteSound()
     } catch (error) {
       console.error('Error deleting todo:', error)
     }
