@@ -1,7 +1,10 @@
 import express from 'express';
 import todoController from '../controllers/todoController.js';
+import auth from '../middleware/auth.js';
 
 const router = express.Router();
+
+router.use(auth);
 
 /**
  * @swagger
@@ -44,6 +47,8 @@ const router = express.Router();
  *   get:
  *     summary: Get all todos
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of todos
@@ -62,6 +67,8 @@ router.get('/', (req, res) => todoController.getAll(req, res));
  *   get:
  *     summary: Get a todo by ID
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -84,6 +91,8 @@ router.get('/:id', (req, res) => todoController.getById(req, res));
  *   post:
  *     summary: Create a new todo
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -106,6 +115,8 @@ router.post('/', (req, res) => todoController.create(req, res));
  *   patch:
  *     summary: Update a todo
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -134,6 +145,8 @@ router.patch('/:id', (req, res) => todoController.update(req, res));
  *   post:
  *     summary: Toggle todo completion status
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -142,7 +155,7 @@ router.patch('/:id', (req, res) => todoController.update(req, res));
  *           type: string
  *     responses:
  *       200:
- *         description: Todo completion status toggled
+ *         description: Todo status toggled successfully
  *         content:
  *           application/json:
  *             schema:
@@ -156,6 +169,8 @@ router.post('/:id/toggle', (req, res) => todoController.toggleComplete(req, res)
  *   delete:
  *     summary: Delete a todo
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -163,7 +178,7 @@ router.post('/:id/toggle', (req, res) => todoController.toggleComplete(req, res)
  *         schema:
  *           type: string
  *     responses:
- *       200:
+ *       204:
  *         description: Todo deleted successfully
  */
 router.delete('/:id', (req, res) => todoController.delete(req, res));

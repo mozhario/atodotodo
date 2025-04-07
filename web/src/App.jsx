@@ -6,18 +6,67 @@ function App() {
   const [todos, setTodos] = useState([])
   const [newTodo, setNewTodo] = useState('')
   const [editingTodos, setEditingTodos] = useState({})
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
 
   useEffect(() => {
-    fetchTodos()
+    const token = localStorage.getItem('token')
+    if (token) {
+      setIsAuthenticated(true)
+      fetchTodos()
+    }
   }, [])
 
   const fetchTodos = async () => {
     try {
-      const response = await axios.get('/api/todos')
+      const token = localStorage.getItem('token')
+      const response = await axios.get('/api/todos', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       setTodos(response.data)
     } catch (error) {
       console.error('Error fetching todos:', error)
+      if (error.response?.status === 401) {
+        handleLogout()
+      }
     }
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.post('/api/auth/register', { username, password })
+      localStorage.setItem('token', response.data.token)
+      setIsAuthenticated(true)
+      setError('')
+      fetchTodos()
+    } catch (error) {
+      setError(error.response?.data?.error || 'Error registering')
+    }
+  }
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.post('/api/auth/login', { username, password })
+      localStorage.setItem('token', response.data.token)
+      setIsAuthenticated(true)
+      setError('')
+      fetchTodos()
+    } catch (error) {
+      setError(error.response?.data?.error || 'Error logging in')
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    setIsAuthenticated(false)
+    setTodos([])
+    setUsername('')
+    setPassword('')
   }
 
   const addTodo = async (e) => {
@@ -25,7 +74,11 @@ function App() {
     if (!newTodo.trim()) return
 
     try {
-      const response = await axios.post('/api/todos', { title: newTodo })
+      const token = localStorage.getItem('token')
+      const response = await axios.post('/api/todos', 
+        { title: newTodo },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       setTodos([response.data, ...todos])
       setNewTodo('')
     } catch (error) {
@@ -35,7 +88,10 @@ function App() {
 
   const toggleTodo = async (id) => {
     try {
-      const response = await axios.post(`/api/todos/${id}/toggle`)
+      const token = localStorage.getItem('token')
+      const response = await axios.post(`/api/todos/${id}/toggle`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       setTodos(todos.map(todo => 
         todo.id === id ? response.data : todo
       ))
@@ -49,7 +105,11 @@ function App() {
     if (!newTitle || newTitle === todos.find(t => t.id === id)?.title) return
 
     try {
-      const response = await axios.patch(`/api/todos/${id}`, { title: newTitle })
+      const token = localStorage.getItem('token')
+      const response = await axios.patch(`/api/todos/${id}`, 
+        { title: newTitle },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       setTodos(todos.map(todo => 
         todo.id === id ? response.data : todo
       ))
@@ -77,16 +137,94 @@ function App() {
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`/api/todos/${id}`)
+      const token = localStorage.getItem('token')
+      await axios.delete(`/api/todos/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       setTodos(todos.filter(todo => todo.id !== id))
     } catch (error) {
       console.error('Error deleting todo:', error)
     }
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="app">
+        <h1 className="text-center mb-4">a todo to do</h1>
+        <div className="auth-form">
+          {error && <p className="error">{error}</p>}
+          {isRegistering ? (
+            <>
+              <form onSubmit={handleRegister}>
+                <h2>Register</h2>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Username"
+                  className="input mb-2"
+                />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="input mb-2"
+                />
+                <button type="submit" className="btn btn-primary mb-2">Register</button>
+              </form>
+              <p className="text-center">
+                Already have an account?{' '}
+                <button 
+                  onClick={() => setIsRegistering(false)}
+                  className="btn-link"
+                >
+                  Login here
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <form onSubmit={handleLogin}>
+                <h2>Login</h2>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Username"
+                  className="input mb-2"
+                />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="input mb-2"
+                />
+                <button type="submit" className="btn btn-primary mb-2">Login</button>
+              </form>
+              <p className="text-center">
+                Don't have an account?{' '}
+                <button 
+                  onClick={() => setIsRegistering(true)}
+                  className="btn-link"
+                >
+                  Register here
+                </button>
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="app">
-      <h1 className="text-center mb-4">Todo App</h1>
+      <div className="header">
+        <h1 className="text-center mb-4">a todo to do</h1>
+        <button onClick={handleLogout} className="btn btn-danger">Logout</button>
+      </div>
       <form onSubmit={addTodo} className="todo-form">
         <input
           type="text"
