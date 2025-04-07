@@ -14,4 +14,108 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #f0f2f5;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.todo-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 4px 8px;
+  margin: 0;
+  border: none;
+  font-size: 16px;
+  background: transparent;
+  cursor: text;
+}
+
+.edit-input:focus {
+  outline: none;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #45a049;
+}
+
+.btn-danger {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #da190b;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.todo-item span {
+  flex: 1;
+  margin: 0 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.todo-item.completed {
+  background-color: #f9f9f9;
+}
+
+.text-decoration-line-through {
+  text-decoration: line-through;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.ml-auto {
+  margin-left: auto;
 } 
