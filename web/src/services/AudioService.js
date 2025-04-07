@@ -19,7 +19,7 @@ class AudioService {
     this.enabled = enabled;
     localStorage.setItem(AUDIO_CONFIG.AUDIO_ENABLED_STORAGE_KEY, enabled);
     if (!enabled) {
-      this.stopCurrentAudio();
+      this.fadeOutCurrentAudio();
     }
   }
 
@@ -50,16 +50,28 @@ class AudioService {
     return sounds[randomIndex];
   }
 
-  stopCurrentAudio() {
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
-      this.currentAudio = null;
-    }
-    if (this.currentTimer) {
-      clearTimeout(this.currentTimer);
-      this.currentTimer = null;
-    }
+  fadeOutCurrentAudio() {
+    if (!this.currentAudio) return;
+
+    const startVolume = this.currentAudio.volume;
+    const startTime = performance.now();
+    
+    const fadeOut = () => {
+      const elapsed = (performance.now() - startTime) / 1000;
+      const progress = Math.min(elapsed / AUDIO_CONFIG.FADE_DURATION, 1);
+      
+      this.currentAudio.volume = startVolume * (1 - progress);
+      
+      if (progress < 1) {
+        requestAnimationFrame(fadeOut);
+      } else {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+        this.currentAudio = null;
+      }
+    };
+
+    fadeOut();
   }
 
   async playSound(category) {
@@ -69,14 +81,17 @@ class AudioService {
     if (!soundPath) return;
 
     try {
-      this.stopCurrentAudio();
+      // Fade out previous sound if exists
+      if (this.currentAudio) {
+        this.fadeOutCurrentAudio();
+      }
 
       const audio = new Audio(soundPath);
       this.currentAudio = audio;
       audio.volume = AUDIO_CONFIG.VOLUME;
       
       this.currentTimer = setTimeout(() => {
-        this.stopCurrentAudio();
+        this.fadeOutCurrentAudio();
       }, AUDIO_CONFIG.DURATION * 1000);
 
       audio.addEventListener('ended', () => {
