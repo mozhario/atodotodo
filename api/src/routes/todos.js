@@ -1,7 +1,42 @@
 import express from 'express';
-import Todo from '../models/Todo.js';
+import todoController from '../controllers/todoController.js';
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Todo:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         completed:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     TodoInput:
+ *       type: object
+ *       required:
+ *         - title
+ *       properties:
+ *         title:
+ *           type: string
+ *     TodoUpdate:
+ *       type: object
+ *       properties:
+ *         title:
+ *           type: string
+ *         completed:
+ *           type: boolean
+ */
 
 /**
  * @swagger
@@ -19,14 +54,29 @@ const router = express.Router();
  *               items:
  *                 $ref: '#/components/schemas/Todo'
  */
-router.get('/', async (req, res) => {
-  try {
-    const todos = await Todo.find().sort({ createdAt: -1 });
-    res.json(todos);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+router.get('/', (req, res) => todoController.getAll(req, res));
+
+/**
+ * @swagger
+ * /api/todos/{id}:
+ *   get:
+ *     summary: Get a todo by ID
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Todo found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ */
+router.get('/:id', (req, res) => todoController.getById(req, res));
 
 /**
  * @swagger
@@ -48,18 +98,7 @@ router.get('/', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Todo'
  */
-router.post('/', async (req, res) => {
-  const todo = new Todo({
-    title: req.body.title
-  });
-
-  try {
-    const newTodo = await todo.save();
-    res.status(201).json(newTodo);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+router.post('/', (req, res) => todoController.create(req, res));
 
 /**
  * @swagger
@@ -87,21 +126,29 @@ router.post('/', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Todo'
  */
-router.patch('/:id', async (req, res) => {
-  try {
-    const todo = await Todo.findById(req.params.id);
-    if (req.body.title) {
-      todo.title = req.body.title;
-    }
-    if (req.body.completed !== undefined) {
-      todo.completed = req.body.completed;
-    }
-    const updatedTodo = await todo.save();
-    res.json(updatedTodo);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+router.patch('/:id', (req, res) => todoController.update(req, res));
+
+/**
+ * @swagger
+ * /api/todos/{id}/toggle:
+ *   post:
+ *     summary: Toggle todo completion status
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Todo completion status toggled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ */
+router.post('/:id/toggle', (req, res) => todoController.toggleComplete(req, res));
 
 /**
  * @swagger
@@ -119,13 +166,6 @@ router.patch('/:id', async (req, res) => {
  *       200:
  *         description: Todo deleted successfully
  */
-router.delete('/:id', async (req, res) => {
-  try {
-    await Todo.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Todo deleted' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+router.delete('/:id', (req, res) => todoController.delete(req, res));
 
 export default router; 

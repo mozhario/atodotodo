@@ -13,6 +13,7 @@ function App() {
   const fetchTodos = async () => {
     try {
       const response = await axios.get('/api/todos')
+      console.log('Fetched todos:', response.data)
       setTodos(response.data)
     } catch (error) {
       console.error('Error fetching todos:', error)
@@ -25,6 +26,7 @@ function App() {
 
     try {
       const response = await axios.post('/api/todos', { title: newTodo })
+      console.log('Added todo:', response.data)
       setTodos([response.data, ...todos])
       setNewTodo('')
     } catch (error) {
@@ -32,11 +34,13 @@ function App() {
     }
   }
 
-  const toggleTodo = async (id, completed) => {
+  const toggleTodo = async (id) => {
+    console.log('Toggling todo with id:', id)
     try {
-      await axios.patch(`/api/todos/${id}`, { completed: !completed })
+      const response = await axios.post(`/api/todos/${id}/toggle`)
+      console.log('Toggled todo:', response.data)
       setTodos(todos.map(todo => 
-        todo._id === id ? { ...todo, completed: !completed } : todo
+        todo.id === id ? response.data : todo
       ))
     } catch (error) {
       console.error('Error updating todo:', error)
@@ -44,9 +48,11 @@ function App() {
   }
 
   const deleteTodo = async (id) => {
+    console.log('Deleting todo with id:', id)
+    console.log('Current todos:', todos)
     try {
       await axios.delete(`/api/todos/${id}`)
-      setTodos(todos.filter(todo => todo._id !== id))
+      setTodos(todos.filter(todo => todo.id !== id))
     } catch (error) {
       console.error('Error deleting todo:', error)
     }
@@ -66,25 +72,28 @@ function App() {
         <button type="submit" className="btn btn-primary">Add</button>
       </form>
       <ul className="todo-list">
-        {todos.map(todo => (
-          <li key={todo._id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo._id, todo.completed)}
-              className="cursor-pointer"
-            />
-            <span className={todo.completed ? 'text-decoration-line-through text-muted' : ''}>
-              {todo.title}
-            </span>
-            <button 
-              onClick={() => deleteTodo(todo._id)} 
-              className="btn btn-danger ml-auto"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
+        {todos.map(todo => {
+          console.log('Rendering todo:', todo)
+          return (
+            <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo.id)}
+                className="cursor-pointer"
+              />
+              <span className={todo.completed ? 'text-decoration-line-through text-muted' : ''}>
+                {todo.title}
+              </span>
+              <button 
+                onClick={() => deleteTodo(todo.id)} 
+                className="btn btn-danger ml-auto"
+              >
+                Delete
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
