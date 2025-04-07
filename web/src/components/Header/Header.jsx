@@ -1,13 +1,36 @@
+import { useState } from 'react';
+import { audioService } from '../../services/AudioService';
 import './Header.css';
 
 function Header({ onLogout }) {
+  const [isAudioEnabled, setIsAudioEnabled] = useState(audioService.isEnabled());
+
+  const handleAudioToggle = () => {
+    const newState = !isAudioEnabled;
+    setIsAudioEnabled(newState);
+    audioService.setEnabled(newState);
+  };
+
   return (
-    <div className="header">
-      <h1 className="text-center mb-4">a todo to do</h1>
-      <button onClick={onLogout} className="btn btn-danger">
-        Logout
-      </button>
-    </div>
+    <header className="header">
+      <h1>a todo to do</h1>
+      <div className="header-controls">
+        <button 
+          onClick={handleAudioToggle} 
+          className="btn-icon"
+          title={isAudioEnabled ? 'Disable sounds' : 'Enable sounds'}
+        >
+          {isAudioEnabled ? '🔉' : '🔇'}
+        </button>
+        <button 
+          onClick={onLogout} 
+          className="btn-icon"
+          title="Logout"
+        >
+          ❌
+        </button>
+      </div>
+    </header>
   );
 }
 

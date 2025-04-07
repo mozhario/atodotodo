@@ -10,7 +10,21 @@ class AudioService {
     };
     this.currentAudio = null;
     this.currentTimer = null;
+    const storedValue = localStorage.getItem(AUDIO_CONFIG.AUDIO_ENABLED_STORAGE_KEY);
+    this.enabled = storedValue === null ? AUDIO_CONFIG.DEFAULT_AUDIO_ENABLED : storedValue !== 'false';
     this.loadSounds();
+  }
+
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    localStorage.setItem(AUDIO_CONFIG.AUDIO_ENABLED_STORAGE_KEY, enabled);
+    if (!enabled) {
+      this.stopCurrentAudio();
+    }
+  }
+
+  isEnabled() {
+    return this.enabled;
   }
 
   loadSounds() {
@@ -49,6 +63,8 @@ class AudioService {
   }
 
   async playSound(category) {
+    if (!this.enabled) return;
+
     const soundPath = this.getRandomSound(category);
     if (!soundPath) return;
 
