@@ -8,6 +8,10 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test": "vitest",
+    "test:unit": "vitest run src/services/__tests__",
+    "test:integration": "vitest run src/tests/integration",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
     "lint": "eslint .",
     "start:prod": "NODE_ENV=production node src/index.js"
   },
@@ -23,12 +27,15 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^1.6.1",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "mongodb-memory-server": "^9.5.0",
     "nodemon": "^3.0.3",
     "prettier": "^3.1.1",
+    "supertest": "^6.3.4",
     "vitest": "^1.0.4"
   }
-} 
+}

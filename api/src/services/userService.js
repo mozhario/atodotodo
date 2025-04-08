@@ -7,6 +7,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export class UserService {
   async register(username, password) {
+    if (!username?.trim()) {
+      throw new Error('Username is required');
+    }
+    if (!password?.trim()) {
+      throw new Error('Password is required');
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       throw new Error('Username already exists');
@@ -33,6 +40,13 @@ export class UserService {
   }
 
   async login(username, password) {
+    if (!username?.trim()) {
+      throw new Error('Username is required');
+    }
+    if (!password?.trim()) {
+      throw new Error('Password is required');
+    }
+
     const user = await User.findOne({ username });
     if (!user) {
       throw new Error('Invalid credentials');
@@ -52,5 +66,20 @@ export class UserService {
         username: user.username
       }
     };
+  }
+
+  async generateToken(userId) {
+    return jwt.sign(
+        { 
+          id: user._id, 
+          username: user.username,
+          // Add a unique identifier to each token
+          nonce: Math.random().toString(36).substring(2),
+          // or use a timestamp
+          iat: Date.now()
+        }, 
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
   }
 } 
