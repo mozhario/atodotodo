@@ -14,7 +14,7 @@ vi.mock('../../services/AudioService', () => ({
 describe('Header Component', () => {
   test('renders the header with title and buttons', () => {
     const mockLogout = vi.fn();
-    render(<Header onLogout={mockLogout} />);
+    const { container } = render(<Header onLogout={mockLogout} />);
 
     // Check if the title is rendered
     expect(screen.getByText('a todo to do')).toBeInTheDocument();
@@ -26,6 +26,9 @@ describe('Header Component', () => {
     // Check if the logout button is rendered
     const logoutButton = screen.getByTitle('Logout');
     expect(logoutButton).toBeInTheDocument();
+
+    // Snapshot test
+    expect(container).toMatchSnapshot();
   });
 
   test('toggles audio state when audio button is clicked', () => {

@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Header Component > renders the header with title and buttons 1`] = `
+<div>
+  <header
+    class="header"
+  >
+    <h1>
+      a todo to do
+    </h1>
+    <div
+      class="header-controls"
+    >
+      <button
+        class="btn-icon"
+        title="Disable sounds"
+      >
+        🔉
+      </button>
+      <button
+        class="btn-icon"
+        title="Logout"
+      >
+        ❌
+      </button>
+    </div>
+  </header>
+</div>
+`;
