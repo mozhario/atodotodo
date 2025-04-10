@@ -20,6 +20,8 @@ app.use(requestLogger);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
+app.get('/', (req, res) => {res.send('Ok.');});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/todos', todoRoutes);
 
