@@ -1,128 +1,105 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import Header from './components/Header/Header'
 import AuthForm from './components/Auth/AuthForm'
 import TodoForm from './components/TodoForm/TodoForm'
 import TodoList from './components/TodoList/TodoList'
 import { audioService } from './services/AudioService'
+import { authService } from './services/authService'
+import { todoService } from './services/todoService'
 import './styles/index.css'
 
 function App() {
   const [todos, setTodos] = useState([])
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isSignedIn, setIsSignedIn] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      setIsAuthenticated(true)
-      fetchTodos()
+    if (authService.isSignedIn()) {
+      setIsSignedIn(true)
+      loadUserTodos()
     }
   }, [])
 
-  const fetchTodos = async () => {
+  const loadUserTodos = async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await axios.get('/api/todos', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setTodos(response.data)
+      const userTodos = await todoService.getUserTodos()
+      setTodos(userTodos)
     } catch (error) {
-      console.error('Error fetching todos:', error)
-      if (error.response?.status === 401) {
-        handleLogout()
-      }
+      console.error('Error loading todos:', error)
     }
   }
 
-  const handleRegister = async (username, password) => {
-    const response = await axios.post('/api/auth/register', { username, password })
-    localStorage.setItem('token', response.data.token)
-    setIsAuthenticated(true)
-    fetchTodos()
+  const handleSignUp = async (username, password) => {
+    await authService.signUp(username, password)
+    setIsSignedIn(true)
+    loadUserTodos()
   }
 
-  const handleLogin = async (username, password) => {
-    const response = await axios.post('/api/auth/login', { username, password })
-    localStorage.setItem('token', response.data.token)
-    setIsAuthenticated(true)
-    fetchTodos()
+  const handleSignIn = async (username, password) => {
+    await authService.signIn(username, password)
+    setIsSignedIn(true)
+    loadUserTodos()
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    setIsAuthenticated(false)
+  const handleSignOut = () => {
+    authService.signOut()
+    setIsSignedIn(false)
     setTodos([])
   }
 
-  const handleAddTodo = async (title) => {
+  const handleCreateTodo = async (title) => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await axios.post('/api/todos', 
-        { title },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      setTodos([response.data, ...todos])
+      const newTodo = await todoService.createTodo(title)
+      setTodos([newTodo, ...todos])
       audioService.playAddSound()
     } catch (error) {
-      console.error('Error adding todo:', error)
+      console.error('Error creating todo:', error)
     }
   }
 
-  const handleToggleTodo = async (id) => {
+  const handleToggleTodoCompletion = async (id) => {
     try {
-      const token = localStorage.getItem('token')
-      const todo = todos.find(t => t.id === id)
-      const response = await axios.post(`/api/todos/${id}/toggle`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const updatedTodo = await todoService.toggleTodoCompletion(id)
       setTodos(todos.map(todo => 
-        todo.id === id ? response.data : todo
+        todo.id === id ? updatedTodo : todo
       ))
-      if (response.data.completed) {
+      if (updatedTodo.completed) {
         audioService.playCheckSound()
       } else {
         audioService.playUncheckSound()
       }
     } catch (error) {
-      console.error('Error updating todo:', error)
+      console.error('Error toggling todo:', error)
     }
   }
 
-  const handleUpdateTodo = async (id, title) => {
+  const handleUpdateTodoTitle = async (id, title) => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await axios.patch(`/api/todos/${id}`, 
-        { title },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      const updatedTodo = await todoService.updateTodoTitle(id, title)
       setTodos(todos.map(todo => 
-        todo.id === id ? response.data : todo
+        todo.id === id ? updatedTodo : todo
       ))
     } catch (error) {
       console.error('Error updating todo:', error)
     }
   }
 
-  const handleDeleteTodo = async (id) => {
+  const handleRemoveTodo = async (id) => {
     try {
-      const token = localStorage.getItem('token')
-      await axios.delete(`/api/todos/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      await todoService.removeTodo(id)
       setTodos(todos.filter(todo => todo.id !== id))
       audioService.playDeleteSound()
     } catch (error) {
-      console.error('Error deleting todo:', error)
+      console.error('Error removing todo:', error)
     }
   }
 
-  if (!isAuthenticated) {
+  if (!isSignedIn) {
     return (
       <div className="app">
         <h1 className="text-center mb-4">a todo to do</h1>
         <AuthForm 
-          onLogin={handleLogin}
-          onRegister={handleRegister}
+          onLogin={handleSignIn}
+          onRegister={handleSignUp}
         />
       </div>
     )
@@ -130,13 +107,13 @@ function App() {
 
   return (
     <div className="app">
-      <Header onLogout={handleLogout} />
-      <TodoForm onAdd={handleAddTodo} />
+      <Header onLogout={handleSignOut} />
+      <TodoForm onAdd={handleCreateTodo} />
       <TodoList
         todos={todos}
-        onToggle={handleToggleTodo}
-        onUpdate={handleUpdateTodo}
-        onDelete={handleDeleteTodo}
+        onToggle={handleToggleTodoCompletion}
+        onUpdate={handleUpdateTodoTitle}
+        onDelete={handleRemoveTodo}
       />
     </div>
   )
