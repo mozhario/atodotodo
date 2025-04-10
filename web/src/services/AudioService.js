@@ -27,21 +27,31 @@ class AudioService {
     return this.enabled;
   }
 
-  loadSounds() {
-    AUDIO_CONFIG.CATEGORIES.forEach(category => {
-      const files = Object.keys(
-        import.meta.glob('/public/audio/todo/*/*.{mp3,ogg,wav}', { 
-          as: 'url',
-          eager: true 
-        })
-      );
+  // loadSounds() {
+  //   AUDIO_CONFIG.CATEGORIES.forEach(category => {
+  //     const files = Object.keys(
+  //       import.meta.glob('/public/audio/todo/*/*.{mp3,ogg,wav}', { 
+  //         as: 'url',
+  //         eager: true 
+  //       })
+  //     );
       
-      this.sounds[category] = files
-        .filter(path => path.includes(`/todo/${category}/`))
-        .map(path => path.replace('/public', ''));
+  //     this.sounds[category] = files
+  //       .filter(path => path.includes(`/todo/${category}/`))
+  //       .map(path => path.replace('/public', ''));
+  //   });
+  // }
+
+  loadSounds() {
+    const files = import.meta.glob('/public/audio/todo/*/*.{mp3,ogg,wav}', { as: 'url', eager: true });
+  
+    AUDIO_CONFIG.CATEGORIES.forEach(category => {
+      this.sounds[category] = Object.entries(files)
+        .filter(([path, url]) => path.includes(`/todo/${category}/`))
+        .map(([path, url]) => url);
     });
   }
-
+  
   getRandomSound(category) {
     const sounds = this.sounds[category];
     if (!sounds || sounds.length === 0) return null;
