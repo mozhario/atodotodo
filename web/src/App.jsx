@@ -7,10 +7,12 @@ import { audioService } from './services/AudioService'
 import { authService } from './services/authService'
 import { todoService } from './services/todoService'
 import './styles/index.css'
+import './styles/loader.css'
 
 function App() {
   const [todos, setTodos] = useState([])
   const [isSignedIn, setIsSignedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (authService.isSignedIn()) {
@@ -20,11 +22,14 @@ function App() {
   }, [])
 
   const loadUserTodos = async () => {
+    setIsLoading(true)
     try {
       const userTodos = await todoService.getUserTodos()
       setTodos(userTodos)
     } catch (error) {
       console.error('Error loading todos:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -109,12 +114,18 @@ function App() {
     <div className="app">
       <Header onLogout={handleSignOut} />
       <TodoForm onAdd={handleCreateTodo} />
-      <TodoList
-        todos={todos}
-        onToggle={handleToggleTodoCompletion}
-        onUpdate={handleUpdateTodoTitle}
-        onDelete={handleRemoveTodo}
-      />
+      {isLoading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <TodoList
+          todos={todos}
+          onToggle={handleToggleTodoCompletion}
+          onUpdate={handleUpdateTodoTitle}
+          onDelete={handleRemoveTodo}
+        />
+      )}
     </div>
   )
 }
