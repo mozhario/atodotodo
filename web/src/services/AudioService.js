@@ -10,6 +10,7 @@ class AudioService {
     };
     this.currentAudio = null;
     this.currentTimer = null;
+    this.preloadedAudios = new Map(); // Store preloaded audio elements
     const storedValue = localStorage.getItem(AUDIO_CONFIG.AUDIO_ENABLED_STORAGE_KEY);
     this.enabled = storedValue === null ? AUDIO_CONFIG.DEFAULT_AUDIO_ENABLED : storedValue !== 'false';
     this.loadSounds();
@@ -20,27 +21,15 @@ class AudioService {
     localStorage.setItem(AUDIO_CONFIG.AUDIO_ENABLED_STORAGE_KEY, enabled);
     if (!enabled) {
       this.fadeOutCurrentAudio();
+    } else {
+      // Start preloading when audio is enabled
+      this.preloadSounds();
     }
   }
 
   isEnabled() {
     return this.enabled;
   }
-
-  // loadSounds() {
-  //   AUDIO_CONFIG.CATEGORIES.forEach(category => {
-  //     const files = Object.keys(
-  //       import.meta.glob('/public/audio/todo/*/*.{mp3,ogg,wav}', { 
-  //         as: 'url',
-  //         eager: true 
-  //       })
-  //     );
-      
-  //     this.sounds[category] = files
-  //       .filter(path => path.includes(`/todo/${category}/`))
-  //       .map(path => path.replace('/public', ''));
-  //   });
-  // }
 
   loadSounds() {
     const files = import.meta.glob('/public/audio/todo/*/*.{mp3,ogg,wav}', { as: 'url', eager: true });
@@ -84,6 +73,21 @@ class AudioService {
     fadeOut();
   }
 
+  preloadSounds() {
+    // Clear existing preloaded audios
+    this.preloadedAudios.clear();
+    
+    // Preload one random sound for each category
+    AUDIO_CONFIG.CATEGORIES.forEach(category => {
+      const soundPath = this.getRandomSound(category);
+      if (soundPath) {
+        const audio = new Audio(soundPath);
+        audio.load(); // Start loading the audio
+        this.preloadedAudios.set(soundPath, audio);
+      }
+    });
+  }
+
   async playSound(category) {
     if (!this.enabled) return;
 
@@ -96,7 +100,12 @@ class AudioService {
         this.fadeOutCurrentAudio();
       }
 
-      const audio = new Audio(soundPath);
+      // Use preloaded audio if available, otherwise create new
+      let audio = this.preloadedAudios.get(soundPath);
+      if (!audio) {
+        audio = new Audio(soundPath);
+      }
+      
       this.currentAudio = audio;
       audio.volume = AUDIO_CONFIG.VOLUME;
       

@@ -1,0 +1,1 @@
+find ./public/audio -type f -name "*.mp3" -exec bash -c 'ffmpeg -i "$0" -b:a 64k tmp.mp3 && mv tmp.mp3 "$0"' {} \;
